@@ -1,0 +1,112 @@
+
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <chrono>
+#include <random>
+
+using namespace std;
+using namespace chrono;
+
+int non_recursive(vector<int>& a, int l, int h) {
+    int p = a[h];
+    int i = l - 1;
+
+    for (int j = l; j < h; j++) {
+        if (a[j] <= p) {
+            i++;
+            swap(a[i], a[j]);
+        }
+    }
+
+    swap(a[i+1], a[h]);
+    return i+1;
+}
+
+void quick_sort_non_recursive(vector<int>& a, int l, int h) {
+    stack<int> s;
+    s.push(l);
+    s.push(h);
+
+    while (!s.empty()) {
+        int h = s.top();
+        s.pop();
+        int l = s.top();
+        s.pop();
+
+        int p_index = non_recursive(a, l, h);
+
+        if (p_index - 1 > l) {
+            s.push(l);
+            s.push(p_index - 1);
+        }
+
+        if (p_index + 1 < h) {
+            s.push(p_index + 1);
+            s.push(h);
+        }
+    }
+}
+
+
+
+int recursive(vector<int>& a, int l, int h) {
+    int p = a[h];
+    int i = l - 1;
+
+    for (int j = l; j < h; j++) {
+        if (a[j] <= p) {
+            i++;
+            swap(a[i], a[j]);
+        }
+    }
+
+    swap(a[i+1], a[h]);
+    return i+1;
+}
+
+void quick_sort_recursive(vector<int>& a, int l, int h) {
+    if (l < h) {
+        int p_index = recursive(a, l, h);
+        recursive(a, l, p_index-1);
+        recursive(a, p_index+1, h);
+    }
+}
+
+
+int main() {
+    const int n = 1000;
+    cout << "array size: " << n << endl;
+    vector<int> a(n);
+    
+   
+    random_device rd;
+    mt19937 gen(rd());    
+    
+    uniform_int_distribution<int> dist(1, 100);
+    for (int i = 0; i < n; i++) {
+        a[i] = dist(gen);
+    }
+    
+    
+    auto start = high_resolution_clock::now();
+    quick_sort_recursive(a,0,n-1);
+    auto end = high_resolution_clock::now();
+    auto duration = duration_cast<chrono::microseconds>(end - start);
+    cout << "Time taken with recursive method: " << duration.count() << " microseconds" << endl;
+    
+    
+    auto start1 = high_resolution_clock::now();
+    quick_sort_non_recursive(a, 0, n - 1);
+    auto end1 = high_resolution_clock::now();
+    auto duration1 = duration_cast<chrono::microseconds>(end1 - start1);
+    cout << "Time taken with iterative method: " << duration1.count() << " microseconds" << endl;
+    
+    
+    cout << endl;
+    
+    
+
+    return 0;
+}
+
